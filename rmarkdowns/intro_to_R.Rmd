@@ -97,6 +97,12 @@ Let's practice creating some variables:
 my_name <- "Victoria DelaCruz" # character strings are stored within quotations
 my_name # run the name of your variable to see the output
 ```
+```{r}
+my_name <- "Nikkos Miyasato"
+my_age = 29
+my_age + 5
+```
+
 
 2. my_age
 ```{r}
