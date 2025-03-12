@@ -125,6 +125,8 @@ Packages required for this tutorial:
 
 - `rnaturalearthhires` (this provides the highest resolution data, which is best for mapping small areas)
 
+# Also can be downloaded through github terminal if package not running through install tools. GitHub has a cope file for naturalearth packages, just make sure to download the install instead of the whole chunk
+
 Refer back to the [Welcome to R](https://nsf-all-spice-alliance.github.io/SDG-Analytics-in-R/rmarkdowns/intro_to_R.html) tutorial if you need a reminder on how to do this.  
 
 ```{r}
@@ -176,7 +178,7 @@ Now let's add a title and subtitle to our map.
 ```{r}
 ggplot(data = world) +
     geom_sf() +
-    ggtitle("Countries of the World", subtitle = "Created by Catherine Brockway")
+    ggtitle("Countries of the World", subtitle = "Created by Nikkos Miyasato")
 
 ```
 
@@ -194,6 +196,11 @@ The code chunk below will create a new dataframe called `world_without_antarctic
 
 **Challenge 2: Instead of removing antarctica, remove Australia from the map**. Remember to change the name of the dataframe to something like `world_without_Australia`. 
 
+```{r}
+world_without_Australia <- world %>%
+  filter(iso_a3 != "AUS")
+```
+
 Nothing against Australia! We're just learning how to navigate dataframes and make choices about our maps.
 ```{r}
 world_without_antarctica <- world %>% 
@@ -207,6 +214,11 @@ ggplot() +
   geom_sf(data = world_without_antarctica)
 ```
 
+```{r}
+ggplot() +
+  geom_sf(data = world_without_Australia)
+```
+# Created my own ggplot for the assignment
 
 Okay, now let's add in titles the way we learned about earlier for our new map. 
 
@@ -230,6 +242,13 @@ ggplot() +
   ggtitle("Countries of the World", subtitle = "without Antarctica")
 ```
 
+```{r}
+ggplot() +
+  geom_sf(data = world_without_Australia, fill = "#e2062c", color = "#000", size = 0.50) +
+   ggtitle("Countries of the world", subtitle = "Without Australia") + theme_void()
+```
+
+
 Now let's work on an important aspect of cartographic design: decluttering our map. Since we are just making a basic world map, let's get rid of the grid lines showing latitude and longitude and the box around our map. The easiest way to do this is to use a theme that is built in to the `ggplot2` package: `theme_void`.
 ```{r}
 ggplot() + 
@@ -238,6 +257,17 @@ ggplot() +
   ggtitle("Countries of the World", subtitle = "without Antarctica")+
   theme_void()
 ```
+
+```{r}
+ggplot() +
+  geom_sf(data = world_without_Australia,
+          aes(fill = as.factor(mapcolor7)),
+          color = "#401D16", size = 0.25) +
+  scale_fill_brewer(palette = "Paired") +
+  guides(fill = "none") +
+  theme_void()
+```
+
 
 We can also use our variables (columns in our dataframe) to add color to each country. The Natural Earth dataset happens to come with some columns with a coloring scheme with 7–13 colors (mapcolor7, mapcolor9, etc.) so that no countries with a shared border share a color. We can "fill" our country polygons with colors using that column `mapcolor7`. 
 
@@ -296,6 +326,16 @@ ggplot(data = world) +
   ggtitle("Lubbock, TX as the Center of the World", subtitle = "Orthographic Azimuthal")+
   theme_void()
 
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = world_without_Australia,
+          aes(fill = as.factor(mapcolor7)),
+          color = "#401D16", size = 0.20) +
+  scale_fill_brewer(palette = "Paired") +
+  guides(fill = "none") + coord_sf(crs = "+proj=ortho +lat_=0=21.21 +lon_0=-157.54") + ggtitle("Salt Lake, Hawai'i as the Center of the World", subtitle = "Orthographic Azimuthal")+
+  theme_void()
 ```
 
 
