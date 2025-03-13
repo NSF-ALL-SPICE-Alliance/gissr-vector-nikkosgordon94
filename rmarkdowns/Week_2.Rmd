@@ -85,6 +85,16 @@ ggplot(data = world) +
 
 ```
 
+```{r}
+ggplot11
+(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-77.05, -77.03), ylim = c(38.88, 38.89)) + # zoom into D.C. area
+  labs(title = "Washington D.C.", subtitle = "Cherry Blossom Field in Tidal Basin") +
+  theme_minimal()
+
+```
+
 This gives us a very simple map which doesn't provide much information. We will need to add more data layers to make the map more meaningful.
 
 Let's create a layer that includes state/province level data. 
@@ -107,6 +117,15 @@ ggplot() +
     ggtitle("Pacific Northwest of the United States")+
     theme_void()
 
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = world) +
+  geom_sf(data = states) +
+  coord_sf(xlim = c(-77.1, -76.9), ylim = c(38.85, 39), expand = FALSE) +
+  ggtitle("Washington D.C.", subtitle = "Cherry Blossom Field in Tidal Basin") +
+  theme_minimal()
 ```
 
 To see what other cultural/political features are available, use the function `df_layers_cultural`. 
@@ -138,6 +157,13 @@ coord_sf(crs = "+proj=ortho +lat_0=0 +lon_0=-160 ") +
 
 
 Now let's add some physical features, like major lakes and rivers.
+# Another code type for global application:
+```{r}
+# Rivers (global)
+rivers_world <- ne_download(scale = 10, type = "rivers_lake_centerlines", category = "physical", returnclass = "sf")
+# Lakes (global)
+lakes_world <- ne_download(scale = 10, type = "lakes", category = "physical", returnclass = "sf")
+```
 
 ```{r}
 # lakes
@@ -172,6 +198,17 @@ ggplot() +
 
 ```
 
+```{r}
+ggplot() +
+  geom_sf(data = world) +
+  geom_sf(data = states) +
+  geom_sf(data = lakes50) +
+  geom_sf(data = rivers50) +
+  coord_sf(xlim = c(-77.1, -76.9), ylim = c(38.85, 39), expand = FALSE) +
+  ggtitle("Washington D.C.", subtitle = "Cherry Blossom Field in Tidal Basin") +
+  theme_minimal()
+```
+
 Now let's choose colors for all of our layers, and add some labels from the `states` layer with a `geom_text` layer. 
 
 **Challenge 5: Update the `coord_sf` with your bounding box and your `ggtitle` with your own title. Change at least one of the colors in the `ggplot` code**. You can use color names like I have here, or you can specify a color using the hex code.
@@ -189,6 +226,17 @@ ggplot() +
 
 ```
 
+```{r}
+ggplot() +
+  geom_sf(data = world, fill = "#838b8b") +
+  geom_sf(data = states, fill = "#00cdcd", size = 0.25) +
+  geom_sf(data = lakes50, fill = "#00bfff", color = "black") +
+  geom_sf(data = rivers50, fill = "#00bfff", size = 0.15) +
+  coord_sf(xlim = c(-77.1, -76.9), ylim = c(38.85, 39), expand = FALSE) +
+  ggtitle("Washington D.C.", subtitle = "Cherry Blossom Field in Tidal Basin") +
+theme_minimal()
+```
+
 For our final addition, let's highlight the specific area we will be focusing on. To do this, we will create a new layer that only includes the state (or province) where we will focus on for our project. 
 
 **Challenge 6: Update the name of the state/province that you are focused on for your project.** Remember to change the name of the data object (to the left of the `<-`) to your target area. 
@@ -196,6 +244,11 @@ For our final addition, let's highlight the specific area we will be focusing on
 ```{r}
 washington <- states %>%
   filter(name == "Washington")
+```
+
+```{r}
+Washington_DC <- states %>%
+  filter(name == "Washington D.C.")
 ```
 
 Now let's add that as a layer (the last `geom_sf` in our code) on our map, use the same fill color as the other states, and color the border red. We want this layer to be on top of the other layers on our map, so it should come after (below) the other `geom_sf` lines of our code. The order of our layers is very important!
@@ -214,6 +267,18 @@ ggplot() +
     ggtitle("Washington State", subtitle = "in the Pacific Northwest Region of the United States")+
     theme_void()
 
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = world, fill = "#838b8b") +
+  geom_sf(data = states, fill = "#00cdcd", size = 0.25) +
+  geom_sf(data = lakes50, fill = "#00bfff", color = "black") +
+  geom_sf(data = rivers50, fill = "#00bfff", size = 0.15) +
+  geom_sf(data = Washington_DC, fill = "red", color = "red", size = 5) +
+  coord_sf(xlim = c(-77.1, -76.9), ylim = c(38.85, 39), expand = FALSE) +
+  ggtitle("Washington D.C.", subtitle = "Cherry Blossom Field in Tidal Basin") +
+  theme_minimal()
 ```
 
 # Final Challenge Preparation
