@@ -261,6 +261,102 @@ For your challenges this week, create the necessary code chunks below. You can c
 
 **Challenge 3: Create an interactive map using the `leaflet` function of your target area and target genus/species.** 
 
+# Assignment
+```{r}
+inat_obs_df <- get_inat_obs(taxon_id = 48754,
+                            place_id = 1856,
+                            quality = "research",
+                            geo = TRUE,
+                            maxresults = 100)
+
+save(inat_obs_df, file = "O'ahu_Blue_Dragon.Rdata")
+```
+```{r}
+ggplot() +
+  geom_point(data = inat_obs_df, aes(x = longitude, y = latitude, color = common_name, text = common_name))
+```
+```{r}
+oahu_bb <- getbb("oahu")
+oahu_bb
+```
+```{r}
+available_tags("natural")
+```
+```{r}
+oahu_coast <- oahu_bb %>%
+  opq() %>%
+  add_osm_feature(key = "natural", value = "coastline") %>%
+  osmdata_sf()
+
+oahu_np <- oahu_bb %>%
+  opq() %>%
+  add_osm_feature(key = "boundary", value = "national_park") %>%
+  osmdata_sf()
+
+oahu_protected <- oahu_bb %>%
+  opq() %>%
+  add_osm_feature(key = "boundary", value = "protected_area") %>%
+  osmdata_sf()
+
+oahu_lifeguards <- oahu_bb %>%
+  opq() %>%
+  add_osm_feature(key = "emergency", value = "lifeguards") %>%
+  osmdata_sf()
+
+oahu_beaches <- oahu_bb %>%
+  opq() %>%
+  add_osm_feature(key = "natural", value = c("beach", "sand", "reef")) %>%
+  osmdata_sf()
+
+oahu_resorts <- oahu_bb %>%
+  opq() %>%
+  add_osm_feature(key = "leisure", value = "beach_resort") %>%
+  osmdata_sf()
+
+oahu_streets <- oahu_bb %>%
+  opq() %>%
+  add_osm_feature(key = "highway", value = c("road", "primary", "secondary", "motorway")) %>%
+  osmdata_sf()
+```
+```{r}
+p <- ggplot() +
+  geom_sf(data = oahu_streets$osm_lines, inherit.aes = FALSE, color = "darkgray", size = .2, alpha = .8) +
+  geom_sf(data = oahu_resorts$osm_lines, inherit.aes = FALSE, color = "pink", size = .3, alpha = .8) +
+  geom_sf(data = oahu_beaches$osm_lines, inherit.aes = FALSE, color = "#f4a460", size = .2, alpha = .8) +
+  geom_sf(data = oahu_lifeguards$osm_lines, inherit.aes = FALSE, color = "red", size = .2, alpha = .8) +
+  geom_sf(data = oahu_coast$osm_lines, inherit.aes = FALSE, color = "#4666ff", size = .8, alpha = .5) +
+  geom_sf(data = oahu_np$osm_polygons, inherit.aes = FALSE, color = "#228b22", size = .2, alpha = .8) +
+  geom_sf(data = oahu_protected$osm_polygons, inherit.aes = FALSE, color = "#fff700", size = .2, alpha = .8) +
+  geom_point(data = inat_obs_df, aes(x = longitude, y = latitude, color = common_name, text = common_name)) +
+  geom_sf_text(size = 1, data = oahu_protected$osm_polygons, aes(label = name)) +
+  coord_sf(xlim = c(-158.28058, -157.64863), ylim = c(21.25482, 21.71201), expand = TRUE) +
+  ggtitle("Blue Dragon Population in O'ahu", subtitle = "Based on iNaturalist Data as of October 2024") +
+  theme_bw() +
+  labs(
+    color="Common Name",
+    x = "Longitude",
+    y = "Latitude"
+  )
+p
+```
+```{r}
+htmltools::p("iNaturalist Observations of Blue Dragons on O'ahu",
+             htmltools::br(),
+             inat_obs_popup_sf$datetime %>%
+               as.Date() %>%
+               range(na.rm = TRUE) %>%
+               paste(collapse = " to "),
+             style = "font-weight:bold; font-size:110%;")
+```
+```{r}
+leaflet(inat_obs_sf) %>%
+  setView(lng = -158, lat = 21.5, zoom = 10)%>%
+  addTiles() %>%
+  addCircleMarkers(data = inat_obs_popup_sf,
+                   popup = ~popup_html,
+                   radius = 5)
+```
+
 
 # Final Challenge Preparation
 
