@@ -85,6 +85,10 @@ Each feature has subcategories, called "tags". The `available_tags()` function l
 available_tags("healthcare")
 ```
 
+```{r}
+available_tags("place")
+```
+
 ## Creating a query to download data
 
 The first step in creating an `osmdata` query is defining the geographical area we want to include in the query. This can be done by defining a bounding box that defines a geographical area by its bounding latitudes and longitudes. The osmdata package provides a function `getbb()` to retrieve the bounding box of a place using its name. We can now create the bounding box of Maui island in Hawaiʻi.
@@ -95,6 +99,12 @@ The first step in creating an `osmdata` query is defining the geographical area 
 bb <- getbb("Maui")
 bb
 ```
+
+```{r}
+bb <- getbb("Washington D.C.")
+bb
+```
+
 The `osmdata` package retrieves data from the overpass API, which is a read-only API that serves up custom selected parts of the OSM map data. To retrieve the required features of a place (defined by the bounding box), we have to then create an overpass query. This can be easily done using the `opq()` function of the osmdata package. Here we use the previously defined bounding box to create the overpass query.
 
 Run the code chunk below to update your bounding box.
@@ -120,6 +130,20 @@ schools <- bb %>%
 
 
 ```
+# Test
+```{r}
+water <- bb %>%
+  opq() %>%
+  add_osm_feature(key = "water", value = "pond") %>%
+  osmdata_sf()
+```
+```{r}
+place <- bb %>%
+  opq() %>%
+  add_osm_feature(key = "place", value = "city") %>%
+  osmdata_sf()
+```
+
 
 ## Understanding the osmdata object
 
@@ -135,17 +159,30 @@ Run the code below to see the `osmdata` object retrieved by querying the schools
 ```{r}
 schools
 ```
+
+```{r}
+water
+```
+
 If you want to look at any part of this object in more detail, use the `$` symbol to specify. For example, if you want to see the metadata, use the code below:
 
 ```{r}
 # metadata
 schools$meta
 ```
+
 Note how the Spatial data returned by the query are Simple Feature objects as we requested using the `osmdata_sf()` function, and how the polygons also contain more details about the hospitals such as their names, websites, wikipedia pages etc. where available.
+```{r}
+water$meta
+```
 
 ```{r}
 # osm_polygons
 schools$osm_polygons
+```
+
+```{r}
+water$osm_polygons
 ```
 
 ## Basic Mapping with OSM
@@ -169,6 +206,14 @@ ggplot() +
   geom_sf_text(data = schools$osm_polygons, aes(label = name), size = 2, hjust = 0) +
   coord_sf(xlim = c(-156.69726, -155.97909), ylim = c(20.57443, 21.03156), expand = FALSE)
 ```
+
+```{r}
+ggplot() +
+  geom_sf(data = water$osm_polygons) +
+  geom_sf_text(data = water$osm_polygons, aes(label = name), size = 2, hjust = 0) +
+  coord_sf(xlim = c(-77.1197, -76.90937), ylim = c(38.79163, 38.99597), expand = FALSE)
+```
+
 The `osmdata` package can also be used to download other spatial features such as streets and coastlines, and overlay them on top of each other using `ggplot2` to create a map with more context. For this we create multiple queries for each feature like the code chunk below.
 
 After reading through the whole tutorial, come back and do:
@@ -195,6 +240,18 @@ coastline <- bb %>%
   osmdata_sf()
 
 ```
+# Updated map
+```{r}
+streets <- bb %>%
+  opq() %>%
+  add_osm_feature(key = "highway", value = c("primary", "secondary", "tertiary", "motorway")) %>%
+  osmdata_sf()
+
+small_streets <- bb %>%
+  opq() %>%
+  add_osm_feature(key = "highway", value = c("residential", "living_street")) %>%
+  osmdata_sf()
+```
 
 Then we use the `ggplot2` package to visualize each of these features along with the hospitals on Maui. Note how we have used different colors, line sizes (thicknesses) and opacities (opaque is the opposite of transparent) to differentiate among the features.
 
@@ -218,6 +275,20 @@ ggplot() +
     y = "Latitude"
   )
 ```
+# Assignment
+```{r}
+ggplot() +
+  geom_sf(data = place$osm_lines, inherit.aes = FALSE, color = "red", size = .5, alpha = .8) +
+  geom_sf(data = streets$osm_lines, inherit.aes = FALSE, color = "#8b7500", size = .2, alpha = .5) +
+  geom_sf(data = small_streets$osm_lines, inherit.aes = FALSE, color = "#ffd700", size = .2, alpha = .5) +
+  theme_bw() +
+  labs(
+    title = "Residents of Washington D.C",
+    x = "Longitude",
+    y = "Latitude"
+  )
+```
+
 This is more helpful. At least now we can see that most schools are either in urban areas (where roads are more dense) or along the coastline. (After you come back and complete Challenge 5, what patterns do you notice in your target area?) 
 
 However, the schools that are clustered together are hard to see and their labels are all overlapping. This is a great reason to use an interactive map that allows us to zoom in and out!
